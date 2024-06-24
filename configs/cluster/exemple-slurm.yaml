@@ -1,0 +1,28 @@
+data_path: /path/to/era5_240/full/
+wandb_dir: /path/to/wandb/
+wandb_mode: offline
+
+precision: 16-mixed
+batch_size: 1
+gpus: 4
+cpus: 3
+
+manual_requeue: True
+
+folder: ./sblogs/${name}/
+
+launcher:
+    cpus_per_task: 4
+    gpus_per_node: ${eval:'min(${cluster.gpus}, 8)'}
+    nodes: ${eval:'1 + (${cluster.gpus}-1) // 8'}
+    tasks_per_node: ${eval:'min(${cluster.gpus}, 8)'}
+    mem_gb: ${eval:'32 * min(${cluster.gpus}, 8)'}
+    timeout_min: 1440
+    name: ${name}
+    slurm_constraint: MI250
+    slurm_account: cad14983
+    slurm_additional_parameters:
+      hint: nomultithread
+    slurm_srun_args:
+      - "--cpu-bind=none"
+      - "--mem-bind=none"

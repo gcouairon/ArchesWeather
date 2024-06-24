@@ -1,0 +1,10 @@
+dataset: 
+  _target_: dataloaders.era5.Era5Forecast
+  path: ${cluster.data_path}
+  lead_time_hours: 24 # mixed
+  input_norm_scheme: pangu
+  output_norm_scheme: delta24
+  data_augmentation: False
+  train_split: all
+  include_vertical_wind_component: True
+  load_prev: True

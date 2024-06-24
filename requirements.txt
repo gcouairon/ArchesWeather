@@ -1,0 +1,16 @@
+pytorch_lightning
+torch
+torchvision
+xarray
+py360convert
+submitit
+diffusers
+tqdm
+apache_beam
+timm
+netCDF4
+wandb
+ipykernel
+matplotlib
+hydra-core==1.3.2
+axial_attention

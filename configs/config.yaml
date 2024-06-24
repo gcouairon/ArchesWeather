@@ -1,0 +1,24 @@
+defaults:
+  - cluster: cleps
+  - dataloader: era5
+  - module: forecast
+  - override hydra/job_logging: none
+  - override hydra/hydra_logging: none
+  - _self_
+
+log: False # wandb logging
+
+name: ${module.name}
+project: ${module.project}
+exp_dir: ${cluster.wandb_dir}${module.project}/${name}/
+
+seed: 0
+max_steps: 300000
+batch_size: ${cluster.batch_size}
+resume: False
+
+save_step_frequency: 50000
+log_freq: 100
+limit_val_batches: null
+accumulate_grad_batches: 1
+debug: False # set to True to debug
