@@ -1,8 +1,4 @@
-import apache_beam   # Needs to be imported separately to avoid TypingError
-import weatherbench2
 import xarray as xr
-import numpy as np
-import sys
 from tqdm import tqdm
 import os
 from pathlib import Path
