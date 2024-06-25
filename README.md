@@ -64,22 +64,22 @@ Here is a quick snippet on how to load an ArchesWeather model and perform infere
 from omegaconf import OmegaConf
 from hydra.utils import instantiate
 import matplotlib.pyplot as plt
+import torch
 
 
-# load dataset
+
+# load model and dataset
+device = 'cuda:0'
+cfg = OmegaConf.load('modelstore/archesweather-M/archesweather-M_config.yaml')
 
 ds = instantiate(cfg.dataloader.dataset, 
                     path='data/era5_240/full/', 
                     domain='test')
 
-# load model
-device = 'cuda:0'
-cfg = OmegaConf.load('modelstore/archesweather-M/archesweather-M_config.yaml')
-
 backbone = instantiate(cfg.module.backbone)
 module = instantiate(cfg.module.module, backbone=backbone, dataset=ds)
 
-ckpt = torch.load('modelstore/archesweather-M_weights.pt', map_location='cpu')
+ckpt = torch.load('modelstore/archesweather-M/archesweather-M_weights.pt', map_location='cpu')
 module.load_state_dict(ckpt)
 module = module.to(device).eval()
 
@@ -123,11 +123,11 @@ The codebase template is based on hydra for configuration.
 the configs are stored in `configs` folder. 
 On each computing infrastructure, you can define the following alias
 ```sh
-alias train='python submit.py cluster=jz-slurm'
-alias debug='python train_hydra.py cluster=jz-slurm'
+alias train='python submit.py cluster=example-slurm'
+alias debug='python train_hydra.py cluster=example-slurm'
 
 ```
-where `jz-slurm` is the file in `configs/cluster` that contains information about how jobs should be started.
+where `example-slurm` is the file in `configs/cluster` that contains information about how jobs should be started.
 
 *train* submits the job to SLURM while *debug* starts the job directly. *train* will log to Weights and Biases by default, unlike *debug*.
 
@@ -159,5 +159,6 @@ By default, if you try to start a run that has the same name as a previous run, 
 Many thanks to the authors of WeatherLearn for adapting the Pangu-Weather pseudocode to pytorch. The code for our model is mostly based on their codebase.
 
 [WeatherBench](https://sites.research.google/weatherbench/)
+
 [WeatherLearn](https://github.com/lizhuoq/WeatherLearn/tree/master)
 
