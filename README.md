@@ -42,12 +42,20 @@ Also, the weatherbench climatology zarr should be saved as netcdf:
 import xarray as xr
 
 obs_path = 'gs://weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_240x121_equiangular_with_poles_conservative.zarr'
-era5_folder = 'datasets/era5_240/'
+era5_folder = 'data/era5_240/'
 obs_xarr = xr.open_zarr(obs_path)
 obs_xarr.to_netcdf(era5_folder)
 ```
 
+### Download model
 
+```sh
+mkdir modelstore/archesweather-M
+src=https://huggingface.co/gcouairon/ArchesWeather/resolve/main
+tgt=modelstore/archesweather-M
+wget -O $tgt/archesweather-M_weights.pt $src/archesweather-M_weights.pt 
+wget -O $tgt/archesweather-M_config.yaml $src/archesweather-M_config.yaml 
+```
 ## ArchesWeather Inference
 
 Here is a quick snippet on how to load an ArchesWeather model and perform inference:
@@ -66,7 +74,7 @@ ds = instantiate(cfg.dataloader.dataset,
 
 # load model
 device = 'cuda:0'
-cfg = OmegaConf.load('modelstore/archesweather-M/config.yaml')
+cfg = OmegaConf.load('modelstore/archesweather-M/archesweather-M_config.yaml')
 
 backbone = instantiate(cfg.module.backbone)
 module = instantiate(cfg.module.module, backbone=backbone, dataset=ds)
