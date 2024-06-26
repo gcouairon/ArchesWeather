@@ -27,25 +27,14 @@ Where `/path/to/models/` is where the trained models are stored, and `/path/to/e
 ### Data
 
 The ``dl_era.py`` scripts downloads data from WeatherBench as netcdf files, because it was originally used on a system that could not handle the many files of the zarr storage system.
-
-You should download data from Weatherbench for years 1979 to 2021, e.g.
+You can download the full dataset sequentially via `python dl_era.py`. If you wish to download the dataset in parrallel using multiple workers, you can download specific years with the script, e.g. via
 
 ```sh
-python dl_era.py --year 1979
+python dl_era.py --clim # to download climatology for ACC metrics
+python dl_era.py --year 2019,2020,2021 # to download specific years
 ```
+You should download data from Weatherbench for years 1979 to 2021 (included). By default the dataset will be downloaded to `data/era5_240/`.
 
-This allows to download data in parrallel. By default the data will be downloaded to `data`.
-
-Also, the weatherbench climatology zarr should be saved as netcdf:
-
-```python
-import xarray as xr
-
-obs_path = 'gs://weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_240x121_equiangular_with_poles_conservative.zarr'
-era5_folder = 'data/era5_240/'
-obs_xarr = xr.open_zarr(obs_path)
-obs_xarr.to_netcdf(era5_folder)
-```
 
 ### Download model
 
@@ -56,6 +45,10 @@ tgt=modelstore/archesweather-M
 wget -O $tgt/archesweather-M_weights.pt $src/archesweather-M_weights.pt 
 wget -O $tgt/archesweather-M_config.yaml $src/archesweather-M_config.yaml 
 ```
+
+You can run a similar command to download the ArchesWeather-S model.
+
+
 ## ArchesWeather Inference
 
 Here is a quick snippet on how to load an ArchesWeather model and perform inference:
@@ -74,7 +67,7 @@ cfg = OmegaConf.load('modelstore/archesweather-M/archesweather-M_config.yaml')
 
 ds = instantiate(cfg.dataloader.dataset, 
                     path='data/era5_240/full/', 
-                    domain='test')
+                    domain='test') # the test domain is year 2020
 
 backbone = instantiate(cfg.module.backbone)
 module = instantiate(cfg.module.module, backbone=backbone, dataset=ds)
@@ -90,6 +83,14 @@ output = module.forward(batch)
 
 # denormalize output
 denorm_pred = ds.denormalize(output, batch)
+
+# get per-sample main metrics from WeatherBench
+from evaluation.deterministic_metrics import headline_wrmse
+denorm_batch = ds.denormalize(batch)
+metrics = headline_wrmse(denorm_pred, denorm_batch, prefix='next_state')
+
+# average metrics
+metrics_mean = {k:v.mean(0) for k, v in metrics.items()}
 
 #plot prediction
 plt.imshow(denorm_pred['next_state_surface'][0, 2, 0].detach().cpu().numpy())
