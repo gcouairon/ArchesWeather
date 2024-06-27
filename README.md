@@ -63,6 +63,7 @@ torch.set_grad_enabled(False)
 
 # load model and dataset
 device = 'cuda:0'
+torch.set_grad_enabled(False)
 cfg = OmegaConf.load('modelstore/archesweather-M/archesweather-M_config.yaml')
 
 ds = instantiate(cfg.dataloader.dataset, 
@@ -155,7 +156,7 @@ The training script handles SLURM pre-emption: when a job is pre-empted, the scr
 By default, if you try to start a run that has the same name as a previous run, the script will check if the configurations for module and datasets are the same. If yes, it will resume the previous run, if not it will issue an error message and exit.
 
 
-## External ressources
+## External resources
 
 Many thanks to the authors of WeatherLearn for adapting the Pangu-Weather pseudocode to pytorch. The code for our model is mostly based on their codebase.
 
