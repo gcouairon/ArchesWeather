@@ -59,7 +59,7 @@ from hydra.utils import instantiate
 import matplotlib.pyplot as plt
 import torch
 
-
+torch.set_grad_enabled(False)
 
 # load model and dataset
 device = 'cuda:0'

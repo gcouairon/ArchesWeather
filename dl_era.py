@@ -27,7 +27,9 @@ years = range(1979, 2022) if not args.years else [int(y) for y in args.years.spl
 for year in years:
     for hour in (0, 6, 12, 18):
         fname = Path(args.folder)/f'era5_240_{year}_{hour}h.nc'
-        if not Path(fname).exists() or not os.stat(fname).st_size in [4580704409, 4593249697]:
+        if Path(fname).exists() and os.stat(fname).st_size < 4580000000:
+            os.remove(fname) # file is corrupted
+        if not Path(fname).exists():
             obs_xarr = xr.open_zarr(obs_path)
         
             ds = obs_xarr.sel(time=obs_xarr.time.dt.year.isin([year]))

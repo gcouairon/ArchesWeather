@@ -14,7 +14,8 @@ import random
 from .preprocessors import default_preprocessor
 from functools import partial
 
-default_filename_filter = dict(last_train= lambda x:('2018' in x),
+default_filename_filter = dict(all= (lambda _: True),
+                               last_train= lambda x:('2018' in x),
                                train= lambda x: not('2019' in x or '2020' in x or '2021' in x),
                                val= lambda x: ('2018' in x or '2019' in x or '2020' in x), # to handle a bit before and after.
                                test= lambda x: ('2019' in x or '2020' in x or '2021' in x))
