@@ -254,6 +254,7 @@ class Era5Forecast(NetcdfDataset):
         out['state_surface'] = obsi['state_surface'].unsqueeze(-3)
         out['state_level'] = obsi['state_level']
         
+        out['lead_time_hours'] = torch.tensor([self.lead_time_hours*int(self.multistep)]).float()
         # next obsi. has function of 
         T = self.lead_time_hours # multistep
 
@@ -264,7 +265,6 @@ class Era5Forecast(NetcdfDataset):
 
         # multistep
         if self.multistep > 1:
-            out['lead_time_hours'] = torch.tensor([self.lead_time_hours*int(self.multistep)]).float()
             future_obsis = []
             for k in range(2, self.multistep+1):
                 future = super().__getitem__(i+k*T//self.timedelta)
