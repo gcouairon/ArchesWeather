@@ -14,7 +14,8 @@ import random
 from .preprocessors import default_preprocessor
 from functools import partial
 
-default_filename_filter = dict(last_train= lambda x:('2018' in x),
+default_filename_filter = dict(all= (lambda _: True),
+                               last_train= lambda x:('2018' in x),
                                train= lambda x: not('2019' in x or '2020' in x or '2021' in x),
                                val= lambda x: ('2018' in x or '2019' in x or '2020' in x), # to handle a bit before and after.
                                test= lambda x: ('2019' in x or '2020' in x or '2021' in x))
@@ -58,6 +59,10 @@ class NetcdfDataset(torch.utils.data.Dataset):
 
         self.cached_xrdataset = None
         self.cached_fileid = None
+
+    def set_timestamp_bounds(self, low, high):
+        self.timestamps = [x for x in self.timestamps if low <= x[-1].astype('datetime64[s]')<high]
+        self.id2pt = dict(enumerate(self.timestamps))
 
     def __len__(self):
         return len(self.id2pt)
@@ -129,7 +134,7 @@ class Era5Forecast(NetcdfDataset):
                  z0012 = False,
                  data_augmentation = False,
                  train_split = 'all', # or 'even' or 'odd'
-                 include_vertical_wind_component=False):
+                 include_vertical_wind_component=True):
         self.__dict__.update({k:v for k, v in locals().items() if k!='self'})
         if variables is None:
             variables = dict(state_level=['geopotential', 'u_component_of_wind', 'v_component_of_wind', 'temperature', 'specific_humidity'], 
@@ -166,8 +171,10 @@ class Era5Forecast(NetcdfDataset):
             if self.load_prev:
                 start_time = start_time - self.lead_time_hours*np.timedelta64(1, 'h')
             end_time = np.datetime64(f'{year+1}-01-01T00:00:00') + self.multistep*self.lead_time_hours*np.timedelta64(1, 'h')
-            self.timestamps = [x for x in self.timestamps if start_time <= x[-1].astype('datetime64[s]')<end_time] # sort by timestamp
-            self.id2pt = dict(enumerate(self.timestamps))
+            print('start time', start_time)
+            super().set_timestamp_bounds(start_time, end_time)
+            #self.timestamps = [x for x in self.timestamps if start_time <= x[-1].astype('datetime64[s]')<end_time] # sort by timestamp
+            #self.id2pt = dict(enumerate(self.timestamps))
 
         # load the constant mask
         

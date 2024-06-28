@@ -115,6 +115,23 @@ class DownSample(nn.Module):
         x = self.linear(x)
         return x
 
+class Mlp(nn.Module):
+    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0., **kwargs):
+        super().__init__()
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+        self.fc1 = nn.Linear(in_features, hidden_features)
+        self.act = act_layer()
+        self.fc2 = nn.Linear(hidden_features, out_features)
+        self.drop = nn.Dropout(drop)
+
+    def forward(self, x: torch.Tensor):
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop(x)
+        x = self.fc2(x)
+        x = self.drop(x)
+        return x
 
 class EarthAttention3D(nn.Module):
     """
@@ -220,6 +237,7 @@ class EarthSpecificBlock(nn.Module):
                  qkv_bias=True, qk_scale=None, drop=0., attn_drop=0., drop_path=0., axis_attn=False,
                  roll_type=0,
                  act_layer=nn.GELU,
+                 mlp_layer=Mlp,
                  norm_layer=nn.LayerNorm):
         super().__init__()
         window_size = (2, 6, 12) if window_size is None else window_size
@@ -250,7 +268,7 @@ class EarthSpecificBlock(nn.Module):
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
 
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, 
+        self.mlp = mlp_layer(in_features=dim, hidden_features=mlp_hidden_dim, 
                              latlon_features=input_resolution[1]*input_resolution[2],
                              act_layer=act_layer, drop=drop)
 
@@ -353,7 +371,7 @@ class EarthSpecificBlock(nn.Module):
             x = x + self.drop_path(gate_mlp[:, None, :] * self.mlp(mlp_input))
         return x
 
-
+    
 
 class BasicLayer(nn.Module):
     """A basic 3D Transformer layer for one stage
@@ -375,6 +393,7 @@ class BasicLayer(nn.Module):
 
     def __init__(self, dim, input_resolution, depth, num_heads, window_size, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop=0., attn_drop=0., drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm,
+                 mlp_layer=Mlp,
                  **kwargs):
         super().__init__()
         self.dim = dim
@@ -388,6 +407,7 @@ class BasicLayer(nn.Module):
                                drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
                                roll_type=(i%2), # 1 or 3
                                act_layer=act_layer,
+                               mlp_layer=mlp_layer,
                                norm_layer=norm_layer, **kwargs)
             for i in range(depth)
         ])
@@ -398,22 +418,6 @@ class BasicLayer(nn.Module):
         return x
 
 
-class Mlp(nn.Module):
-    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0., **kwargs):
-        super().__init__()
-        out_features = out_features or in_features
-        hidden_features = hidden_features or in_features
-        self.fc1 = nn.Linear(in_features, hidden_features)
-        self.act = act_layer()
-        self.fc2 = nn.Linear(hidden_features, out_features)
-        self.drop = nn.Dropout(drop)
 
-    def forward(self, x: torch.Tensor):
-        x = self.fc1(x)
-        x = self.act(x)
-        x = self.drop(x)
-        x = self.fc2(x)
-        x = self.drop(x)
-        return x
 
 

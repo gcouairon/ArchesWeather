@@ -54,7 +54,7 @@ ds_test = instantiate(cfg.dataloader.dataset,
                     domain='test', 
                     z0012=True)
 backbone = instantiate(cfg.module.backbone)
-paths = sorted(Path('modelstore/{model_uid}/checkpoints').iterdir(), key=os.path.getmtime)
+paths = sorted(Path(f'modelstore/{model_uid}/checkpoints').iterdir(), key=os.path.getmtime)
 path = [x for x in paths if step in x.name][0]
 print('using path', path)
 
