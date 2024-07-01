@@ -1,6 +1,11 @@
 
 ## General presentation
-This codebase is for training AI weather models. It uses pytorch lightning, and logs data to Weights and Biases by default. For submission to SLURM it uses the submitit package. 
+
+This codebase is the code for running and training [ArchesWeather](https://arxiv.org/abs/2405.14527).
+
+Below is an exemple of a 10-day rollout for the ArchesWeather-M model initialized on January 1st, 2020 (with rollout steps of 24h).
+![rollout_vid](https://huggingface.co/gcouairon/ArchesWeather/resolve/main/vid_rollout_jan1st.mp4)
+
 
 ## Installation
 
@@ -120,7 +125,8 @@ for i in range(multistep):
 
 ## Codebase logic
 
-The codebase template is based on hydra for configuration.
+The codebase uses pytorch lightning, hydra, and logs data to Weights and Biases by default. For submission to SLURM it uses the submitit package. 
+
 the configs are stored in `configs` folder. 
 On each computing infrastructure, you can define the following alias
 ```sh
