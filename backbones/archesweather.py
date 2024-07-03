@@ -291,35 +291,23 @@ class ArchesWeatherCond(nn.Module):
         if self.first_interaction_layer:
             x = self.interaction_layer(x)
 
+
+        x = self.layer1(x, cond_emb)
+
+        skip = x
+        x = self.downsample(x)
+        
+        x = self.layer2(x, cond_emb)
+
         if self.gradient_checkpointing:
-            # unused for now
-            x = gradient_checkpoint.checkpoint(self.layer1, x, cond_emb, use_reentrant=False)
-            skip = x
-            x = self.downsample(x)
-            
-            x = gradient_checkpoint.checkpoint(self.layer2, x, cond_emb, use_reentrant=False)
             x = gradient_checkpoint.checkpoint(self.layer3, x, cond_emb, use_reentrant=False)
-
-            x = self.upsample(x)
-            if self.use_skip and skip is not None:
-                x = torch.concat([x, skip], dim=-1)
-
-            x = gradient_checkpoint.checkpoint(self.layer4, x, cond_emb, use_reentrant=False)
-
         else:
-
-            x = self.layer1(x, cond_emb)
-
-            skip = x
-            x = self.downsample(x)
-            
-            x = self.layer2(x, cond_emb)
             x = self.layer3(x, cond_emb)
 
-            x = self.upsample(x)
-            if self.use_skip and skip is not None:
-                x = torch.concat([x, skip], dim=-1)
-            x = self.layer4(x, cond_emb)
+        x = self.upsample(x)
+        if self.use_skip and skip is not None:
+            x = torch.concat([x, skip], dim=-1)
+        x = self.layer4(x, cond_emb)
 
         output = x
         output = output.transpose(1, 2).reshape(output.shape[0], -1, 8, *self.layer1_shape)
