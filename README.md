@@ -6,7 +6,7 @@ This codebase is the code for running and training [ArchesWeather](https://arxiv
 Below is an exemple of a 10-day rollout for the ArchesWeather-M model initialized on January 1st, 2020 (with rollout steps of 24h).
 
 
-![](https://huggingface.co/gcouairon/ArchesWeather/resolve/main/vid_rollout_jan1st.mp4)
+https://huggingface.co/gcouairon/ArchesWeather/resolve/main/vid_rollout_jan1st.mp4
 
 
 ## Installation
