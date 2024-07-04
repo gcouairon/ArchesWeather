@@ -1,5 +1,7 @@
 
-![logo2](https://github.com/gcouairon/ArchesWeather/assets/24316340/bad8bf80-7528-4e08-8072-ad84fc29d987 | width=50)
+<p align='center'>
+<img src='https://github.com/gcouairon/ArchesWeather/assets/24316340/bad8bf80-7528-4e08-8072-ad84fc29d987' width='50%' />
+</p>
 
 ## General presentation
 
